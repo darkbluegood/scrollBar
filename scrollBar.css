@@ -1,0 +1,18 @@
+.scrollBar-bar-sl{
+	position: relative;
+	width:250px;
+	height:10px;
+	border: 1px solid #d4a375;
+	background: #f0e3bf;
+	cursor: pointer;
+}
+.scrollBar-drag-sl{
+	position: absolute;
+	top:0px;
+	left:0;
+	width: 10px;
+	height: 10px;
+	background: red;
+	cursor: default;
+
+}
