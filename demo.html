@@ -1,0 +1,227 @@
+<!doctype html>
+<html>
+<head>
+	<title></title>
+	<meta charset="utf-8" />
+	<script type="text/javascript" src="jquery-1.9.1.min.js"></script>
+	<script type="text/javascript" src="jquery.mousewheel.js"></script>
+
+	<style type="text/css">
+		*{margin:0;padding:0;}
+		li,ul{ list-style:none outside none; }
+		.mydiv{background:red;width:100px;height:100px;position: absolute;left: 0;top:250px;}
+		#mydiv1{  top:350px;}
+
+		.myscroll{ background: #f0e3bf;border: 1px solid #d4a375;margin:10px auto;cursor: pointer; }
+		.scrollBar-drag-sl{ width: 20px;height:10px;background: red; }
+	</style>
+
+</head>
+<body>
+	
+	<div id="myscroll_a" class="myscroll"></div>
+
+	<div id="myscroll_b" class="myscroll"></div>
+
+	<div id="myscroll_c" class="myscroll"></div>
+<p id="count">0%<p>
+	<p id="count1">0%<p>
+		<p id="count2">0%<p>
+	<img src="4121530_562.jpg" alt="" id="zoom" style="display:block">
+
+	<div id="mydiv" class="mydiv"></div>
+
+	<div id="mydiv1" class="mydiv"></div>
+
+<script type="text/javascript">
+
+
+function log(val){
+	return console.log(val);
+}
+
+$.fn.scrollBar = function(o){
+
+	
+
+	var o = $.extend({},{
+		width : 300,
+		height : 20,
+		initValSrart : false,
+		initVal : 0,
+		mode : "h",  //"h" or "v"
+		callback : function(){}
+	},o)
+	
+
+	return $(this).each(function(){
+		var $doc = $(document),
+			$this = $(this),
+			$drag;
+
+		var s1 = o.initVal;
+
+		var mode,current=0,result=0,rate=0;
+
+		function main(){
+			createHTML();
+			mode = mode();
+			if(!mode){
+				alert("模式错误!");
+				return false;
+			}
+
+			initValSrart();
+			eventTrigger();
+		}
+		main();
+
+		function initValSrart(){
+			current = o.initVal/mode.s*100;
+			if(o.initValSrart){
+				result = 100 - current;
+				rate = result / (mode.s-mode.g);
+				$drag.css(mode.d,s1 = 0);
+			}else{
+				run(o.initVal);
+			}
+			callback(current);
+		}
+
+		function callback(parameter){
+			return o.callback(parameter);
+		}
+
+		function mode(){
+			var m;
+			m = o.mode == "h" ? { d : "left" , s : o.width , g : $drag.width() } : o.mode == "v" ? { d : "top" , s : o.height , g : $drag.height() } : false;
+			if(o.initVal > m.s){
+				alert("默认值超出容器大小!");
+				return false;
+			}
+			return m;
+		}
+
+		function createHTML(){
+			$this.addClass("scrollBar-wrap-sl").css({
+				position : "relative",
+				width : o.width,
+				height : o.height
+			});
+
+			$drag = $this.html("<div class='scrollBar-drag-sl' />").children();
+			$drag.css({
+				position : "absolute",
+				top : 0,
+				left : 0
+			});
+		}
+
+		function run(parameter){
+			var sum = mode.s-mode.g;
+			if(parameter <= 0){
+				$drag.css(mode.d,s1 = parameter = 0);
+			}else if(parameter >= sum){
+				$drag.css(mode.d,s1 = parameter = sum);
+			}else{
+				$drag.css(mode.d,parameter);
+			}
+			if(o.initValSrart){
+				callback(current+parameter*rate);
+			}else{
+				callback(parameter/sum*100);
+			}
+		}
+
+		function mousePos(event){
+			var m;
+			m = o.mode == "h" ? $.extend({},{
+				p : $drag.position().left,
+				t : event.pageX - $this.offset().left
+			},mode) : $.extend({},{
+				p : $drag.position().top,
+				t : event.pageY - $this.offset().top
+			},mode);
+			return m;
+		}
+		
+		function eventTrigger(){
+			$drag.bind("mousedown",function(event){
+				event.stopPropagation();
+				event.preventDefault();
+
+				var start = mousePos(event).t - mousePos(event).p;
+				$(document).bind("mousemove",function(event){
+					run( s1 = mousePos(event).t - start );
+				})
+			});
+
+			$(document).bind("mouseup",function(){
+				$(document).unbind("mousemove");
+			})
+
+			$this.bind("mousedown",function(event){
+				run( s1 = mousePos(event).t - mode.g/2 )
+			})
+
+			if($doc.mousewheel){
+				$this.bind("mousewheel",function(event,deilt){
+					event.preventDefault();
+					run(s1-=deilt*8);
+				});
+			}
+		}
+		
+	})
+
+}
+
+$("#myscroll_a").scrollBar({
+	width : 300,
+	height : 10,
+	mode : "h",
+	initValSrart : true,
+	initVal : 100,
+	callback : function(val){
+		$("#count").text(val)
+	}
+});
+
+$("#myscroll_b").scrollBar({
+	width : 300,
+	height : 10,
+	mode : "h",
+	initValSrart : true,
+	initVal : 60,
+	callback : function(val){
+		$("#count1").text(val)
+	}
+});
+
+$("#myscroll_c").scrollBar({
+	width : 400,
+	height : 50,
+	mode : "v",
+	initValSrart : false,
+	initVal : 49,
+	callback : function(val){
+		$("#zoom").css("transform","scale("+(val/100)+")");
+		$("#count2").text(val)
+	}
+})
+	
+$("#mydiv").scrollBar({
+	width : 300,
+	height : 10,
+	initVal : 30
+})
+	
+$("#mydiv1").scrollBar({
+})
+
+	
+
+</script>
+
+</body>
+</html>
