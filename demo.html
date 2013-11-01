@@ -13,7 +13,10 @@
 		#mydiv1{  top:350px;}
 
 		.myscroll{ background: #f0e3bf;border: 1px solid #d4a375;margin:10px auto;cursor: pointer; }
-		.scrollBar-drag-sl{ width: 20px;height:10px;background: red; }
+		.scrollBar-drag-sl{ width: 60px;height:10px;background: red; }
+
+		.list_wrap{ width: 350px;height: 150px;overflow: hidden;position: relative; }
+		.list_wrap ul{ position: absolute;top: 0;left: 0; }
 	</style>
 
 </head>
@@ -22,6 +25,28 @@
 	<div id="myscroll_a" class="myscroll"></div>
 
 	<div id="myscroll_b" class="myscroll"></div>
+
+	<div class="list_wrap">
+		<ul id="sheng">
+			<li><a href="">1从一幅图中了解开源世界...</a></li>
+			<li><a href="">2从一幅图中了解开源世界...</a></li>
+			<li><a href="">3从一幅图中了解开源世界...</a></li>
+			<li><a href="">从一幅图中了解开源世界...</a></li>
+			<li><a href="">从一幅图中了解开源世界...</a></li>
+			<li><a href="">从一幅图中了解开源世界...</a></li>
+			<li><a href="">从一幅图中了解开源世界...</a></li>
+			<li><a href="">从一幅图中了解开源世界...</a></li>
+			<li><a href="">从一幅图中了解开源世界...</a></li>
+			<li><a href="">从一幅图中了解开源世界...</a></li>
+			<li><a href="">从一幅图中了解开源世界...</a></li>
+			<li><a href="">从一幅图中了解开源世界...</a></li>
+			<li><a href="">从一幅图中了解开源世界...</a></li>
+			<li><a href="">从一幅图中了解开源世界...</a></li>
+			<li><a href="">从一幅图中了解开源世界...</a></li>
+			<li><a href="">从一幅图中了解开源世界...</a></li>
+			<li><a href="">从一幅图中了解开源世界...</a></li>
+		</ul>
+	</div>
 
 	<div id="myscroll_c" class="myscroll"></div>
 <p id="count">0%<p>
@@ -42,13 +67,12 @@ function log(val){
 
 $.fn.scrollBar = function(o){
 
-	
-
 	var o = $.extend({},{
 		width : 300,
 		height : 20,
 		initValSrart : false,
 		initVal : 0,
+		wheel : true,
 		mode : "h",  //"h" or "v"
 		callback : function(){}
 	},o)
@@ -146,14 +170,18 @@ $.fn.scrollBar = function(o){
 		}
 		
 		function eventTrigger(){
-			$drag.bind("mousedown",function(event){
-				event.stopPropagation();
-				event.preventDefault();
 
+			function move(event){
 				var start = mousePos(event).t - mousePos(event).p;
 				$(document).bind("mousemove",function(event){
 					run( s1 = mousePos(event).t - start );
 				})
+			}
+
+			$drag.bind("mousedown",function(event){
+				event.stopPropagation();
+				event.preventDefault();
+				move(event);
 			});
 
 			$(document).bind("mouseup",function(){
@@ -161,11 +189,13 @@ $.fn.scrollBar = function(o){
 			})
 
 			$this.bind("mousedown",function(event){
-				run( s1 = mousePos(event).t - mode.g/2 )
+				event.preventDefault();
+				run( s1 = mousePos(event).t - mode.g/2 );
+				move(event);
 			})
 
-			if($doc.mousewheel){
-				$this.bind("mousewheel",function(event,deilt){
+			if(o.wheel && $doc.mousewheel){
+				$this.add(o.wheelElement).bind("mousewheel",function(event,deilt){
 					event.preventDefault();
 					run(s1-=deilt*8);
 				});
@@ -191,21 +221,27 @@ $("#myscroll_b").scrollBar({
 	width : 300,
 	height : 10,
 	mode : "h",
-	initValSrart : true,
-	initVal : 60,
+	initValSrart : false,
+	wheelElement : $("#sheng"),
+	initVal : 30,
 	callback : function(val){
+		var h = this.wheelElement.height()-this.wheelElement.parent().height();
+		var r = val/100;
+		this.wheelElement.css("top",(-h*r)+"px");
 		$("#count1").text(val)
 	}
 });
 
 $("#myscroll_c").scrollBar({
-	width : 400,
-	height : 50,
+	width : 10,
+	height : 350,
 	mode : "v",
+	wheel : true,
+	wheelElement : $("#zoom"),
 	initValSrart : false,
-	initVal : 49,
+	initVal : 4,
 	callback : function(val){
-		$("#zoom").css("transform","scale("+(val/100)+")");
+		this.wheelElement.css("transform","scale("+(val/100)+")");
 		$("#count2").text(val)
 	}
 })
