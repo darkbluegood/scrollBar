@@ -91,7 +91,7 @@ $.fn.scrollBar = function(o){
 			createHTML();
 			mode = mode();
 			if(!mode){
-				alert("模式错误!");
+				alert("模式错误或者默认值超出容器大小!"");
 				return false;
 			}
 
@@ -120,7 +120,6 @@ $.fn.scrollBar = function(o){
 			var m;
 			m = o.mode == "h" ? { d : "left" , s : o.width , g : $drag.width() } : o.mode == "v" ? { d : "top" , s : o.height , g : $drag.height() } : false;
 			if(o.initVal > m.s){
-				alert("默认值超出容器大小!");
 				return false;
 			}
 			return m;
