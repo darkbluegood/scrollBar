@@ -1,149 +1,172 @@
+/*
+ * scrollBar version 1.0
+ *
+ * author by 深蓝
+ * http://www.5code.net/plugin/scrollBar/scrollBar.html
+ * Email:raowen520@gmail.com
+ *
+ * Date:2013-11-05
+ *
+ */
+
+function log(val){
+	return console.log(val);
+}
+
 ;(function($){
+	$.fn.scrollBar = function(o){
 
-	function log(val){
-		return console.log(val)
-	}
-
-	$.fn.scrollBar = function(options){
-
-		var options = $.extend({},{
-			mode : "v",  //"h" or "v"
-			width : 20,
-			height : 250,
-			defaultStart : false,
-			defaultVal : 0,
-			wheel : false,
+		var o = $.extend({},{
+			width : 300,
+			height : 20,
+			initValSrart : false,
+			initVal : 0,
 			wheelElement : null,
+			wheel : true,
+			mode : "h",  //"h" or "v"
+			animate : function(el,dir,target){
+				animate(el,dir,target);
+			},
 			callback : function(){}
-		},options);
+		},o);
 
-		$(this).each(function(){
-			var $this = $(this),
-				doc = $(document),
-				drag = $("<div class='scrollBar-drag-sl'></div>");
-
-			var on_off = false,
-				wheelPos = options.defaultStart ? 0 : options.defaultVal;
-
-			var mode = options.mode == "h" ? 
-			{ d : options.mode , s : "width" , m : "left" , val : options.width } : 
-			options.mode == "v" ? 
-			{ d : options.mode , s : "height" , m : "top" , val : options.height } : 
-			false ;
-
-			if(!mode){
-				alert("输入错误!");
-				return false;
-			}
-
-			var rate = Math.round((options.defaultVal/mode.val)*100);
-
-			function init(){
-				if(!$this.hasClass("scrollBar-bar-sl")){
-					$this.addClass("scrollBar-bar-sl");
+		function animate(el,dir,target){
+			var cur = parseInt(el.position()[dir]);
+			;(function(){
+				target = Math.round(target);
+				var duration = (target - cur) / 4.2;
+				duration = duration > 0 ? Math.ceil(duration) : Math.floor(duration);
+				cur = cur + duration;
+				el.css(dir,cur);
+				el.timer = setTimeout(arguments.callee,40);
+				if(cur == target){
+					el.timer && clearTimeout(el.timer);
 				}
-				$this.css({
-					"width" : options.width,
-					"height" : options.height
-				});
-				$this.append(drag);
-				options.callback(rate);
-				if(options.defaultStart){
-					drag.css(mode.m,0);
+			})();
+		}
+
+		return $(this).each(function(){
+			var $doc = $(document),
+				$this = $(this),
+				$drag;
+
+			var s1 = o.initVal;
+
+			var mode,current=0,result=0,rate=0;
+
+			function main(){
+				createHTML();
+				mode = mode();
+				if(!mode){
+					alert("模式错误或者默认值超出容器大小!");
+					return false;
+				}
+
+				initValSrart();
+				eventTrigger();
+			}
+			main();
+
+			function initValSrart(){
+				current = o.initVal/mode.s*100;
+				if(o.initValSrart){
+					result = 100 - current;
+					rate = result / (mode.s-mode.g);
+					$drag.css(mode.d,s1 = 0);
 				}else{
-					drag.css(mode.m,options.defaultVal);
+					$drag.css(mode.d,o.initVal);
 				}
-				eventHandler();
+				callback(current);
 			}
-			init();
 
-			mode = $.extend(mode,{
-				dragVal : drag.width()
-			});
+			function callback(parameter){
+				return o.callback(parameter);
+			}
 
-			var g1 = mode.val - mode.dragVal,
-				g2 = mode.dragVal / 2,
-				g3 = 100-rate;
-				g4 = g3/g1;
+			function mode(){
+				var m;
+				m = o.mode == "h" ? { d : "left" , s : o.width , g : $drag.width() } : o.mode == "v" ? { d : "top" , s : o.height , g : $drag.height() } : false;
+				if(o.initVal > m.s){
+					return false;
+				}
+				return m;
+			}
 
-			if(options.defaultVal > g1){
-				alert("默认值应该小于等于总宽度");
-				return false;
+			function createHTML(){
+				$this.addClass("scrollBar-wrap-sl").css({
+					position : "relative",
+					width : o.width,
+					height : o.height
+				});
+
+				$drag = $this.html("<div class='scrollBar-drag-sl' />")
+				.children().css({
+					position : "absolute",
+					top : 0,
+					left : 0
+				});
+			}
+
+			function run(parameter){
+				$drag.timer && clearTimeout($drag.timer);
+				var sum = mode.s-mode.g;
+				if(parameter <= 0){
+					animate($drag,mode.d,s1 = parameter = 0);
+				}else if(parameter >= sum){
+					animate($drag,mode.d,s1 = parameter = sum);
+				}else{
+					animate($drag,mode.d,parameter);
+				}
+				if(o.initValSrart){
+					callback(current+parameter*rate);
+				}else{
+					callback(parameter/sum*100);
+				}
+			}
+
+			function mousePos(event){
+				var m;
+				m = o.mode == "h" ? $.extend({},{
+					p : $drag.position().left,
+					t : event.pageX - $this.offset().left
+				},mode) : $.extend({},{
+					p : $drag.position().top,
+					t : event.pageY - $this.offset().top
+				},mode);
+				return m;
 			}
 			
-			function eventHandler(){
-				drag.bind("mousedown",function(event){
-					event.preventDefault();
+			function eventTrigger(){
+				$drag.bind("mousedown",function(event){
 					event.stopPropagation();
-					doc.bind("mousemove",sliderMove);
-				});	
-
-				doc.bind("mouseup",function(){
-					doc.unbind("mousemove",sliderMove);
+					event.preventDefault();
+					var start = mousePos(event).t - mousePos(event).p;
+					$(document).bind("mousemove",function(event){
+						run( s1 = mousePos(event).t - start  );
+					});
 				});
 
-				$this.bind("mousedown",sliderClick);
+				$(document).bind("mouseup",function(){
+					$(document).unbind("mousemove");
+				})
 
-				if(options.wheel && doc.mousewheel){
-					if(options.wheelElement){
-						options.wheelElement.addClass("scrollBar-box-1223-sl");
-					}
-					$this.add(options.wheelElement).bind("mousewheel",function(event,deilt){
+				$this.bind("mousedown",function(event){
+					event.preventDefault();
+					run( s1 = mousePos(event).t - mode.g/2 );
+					$(document).bind("mousemove",function(event){
+						run( s1 = mousePos(event).t - mode.g/2  );
+					});
+				})
 
+				if(o.wheel && $doc.mousewheel){
+					$this.add(o.wheelElement).bind("mousewheel",function(event,deilt){
 						event.preventDefault();
-						wheelPos -= deilt*10;
-						run(wheelPos);
-						
-					})
+						run(s1-=deilt*8);
+					});
 				}
 			}
 			
-			function posFunc(event){
-				if(typeof event != "object"){
-					return 0;
-				}
-				mode = $.extend(mode,{
-					pos : mode.d == "h" ? event.pageX - $this.offset().left - g2 : event.pageY - $this.offset().top - g2
-				});
-				return mode.pos;
-			}
+		})
 
-			function run(event){
-				posDeilt = wheelPos + posFunc(event);
-				wheelPos = posDeilt;
-				if(posDeilt <= 0){
-					wheelPos=0;
-					drag.css(mode.m,"0");
-					if(options.defaultStart){
-						options.callback(rate);
-					}else{
-						options.callback(0);
-					}
-				}else if(mode.val - posDeilt < g2*2){
-					wheelPos = g1;
-					drag.css(mode.m,g1);
-					options.callback(100);
-				}else{
-					drag.css(mode.m,posDeilt);
-					if(options.defaultStart){
-						var rate1 = posDeilt*g4;
-						options.callback(Math.round((rate + rate1)));
-					}else{
-						options.callback(Math.round((posDeilt/g1)*100));
-					}
-				}
-			}
-
-			function sliderMove(event){
-				wheelPos =0;
-				run(event)
-			}
-
-			function sliderClick(event){
-				wheelPos =0;
-				run(event)
-			}
-		});
 	}
-
 })(jQuery);
