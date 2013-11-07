@@ -16,3 +16,7 @@
 	cursor: default;
 
 }
+
+.myScroll .scrollBar-drag-sl{
+	width: 60px
+}
