@@ -69,7 +69,6 @@ $("#myscroll_a").scrollBar({
 	width : 300,
 	height : 10,
 	mode : "h",
-	initValSrart : true,
 	initVal : 100,
 	callback : function(val){
 		$("#count").text(val)
@@ -80,14 +79,9 @@ $("#myscroll_b").scrollBar({
 	width : 300,
 	height : 10,
 	mode : "h",
-	initValSrart : false,
 	wheelElement : $("#sheng"),
 	initVal : 30,
 	callback : function(val){
-		var h = this.wheelElement.height()-this.wheelElement.parent().height();
-		var r = val/100;
-		//this.wheelElement.css("top",(-h*r)+"px");
-		this.animate(this.wheelElement,"top",-h*r)
 		$("#count1").text(val)
 	}
 });
@@ -98,7 +92,6 @@ $("#myscroll_c").scrollBar({
 	mode : "v",
 	wheel : true,
 	wheelElement : $("#zoom"),
-	initValSrart : false,
 	initVal : 52,
 	callback : function(val){
 		this.wheelElement.css("transform","scale("+(val/100)+")");
