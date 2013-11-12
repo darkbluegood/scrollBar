@@ -30,7 +30,7 @@ function log(val){
 			var cur = parseInt(el.position()[dir]);
 			;(function(){
 				target = Math.round(target);
-				var duration = (target - cur) / 4.2;
+				var duration = (target - cur) / 10;
 				duration = duration > 0 ? Math.ceil(duration) : Math.floor(duration);
 				cur = cur + duration;
 				el.css(dir,cur);
@@ -130,6 +130,9 @@ function log(val){
 
 
 			function run(parameter){
+				if(checkWheelEl(o.wheelElement)){
+					o.wheelElement.timer && clearTimeout(o.wheelElement.timer);
+				}
 				$drag.timer && clearTimeout($drag.timer);
 
 				if(parameter <= 0){
@@ -190,7 +193,7 @@ function log(val){
 				if(o.wheel && $doc.mousewheel){
 					$this.add(o.wheelElement).bind("mousewheel",function(event,deilt){
 						event.preventDefault();
-						run(s1-=deilt*8);
+						run(s1-=deilt*50);
 					});
 				}
 			}
