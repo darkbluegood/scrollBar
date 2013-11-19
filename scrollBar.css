@@ -1,22 +1,40 @@
-.scrollBar-bar-sl{
-	position: relative;
-	width:250px;
-	height:10px;
+/*垂直*/
+.scrollBar-bar-y-sl{
+	position: absolute;
+	top:0;
+	right:0;
+	width:16px;
+	height:198px;
 	border: 1px solid #d4a375;
 	background: #f0e3bf;
 	cursor: pointer;
 }
-.scrollBar-drag-sl{
+.scrollBar-drag-y-sl{
 	position: absolute;
 	top:0px;
 	left:0;
-	width: 10px;
+	width: 16px;
 	height: 10px;
 	background: red;
 	cursor: default;
-
 }
-
-.myScroll .scrollBar-drag-sl{
-	width: 60px
+/*水平*/
+.scrollBar-bar-x-sl{
+	position: absolute;
+	bottom:0;
+	left:0;
+	width:198px;
+	height:16px;
+	border: 1px solid #d4a375;
+	background: #f0e3bf;
+	cursor: pointer;
+}
+.scrollBar-drag-x-sl{
+	position: absolute;
+	top:0px;
+	left:0;
+	width: 60px;
+	height: 16px;
+	background: red;
+	cursor: default;
 }
