@@ -5,7 +5,7 @@
  * http://www.5code.net/plugin/scrollBar/scrollBar.html
  * Email:raowen520@gmail.com
  *
- * Date:2013-11-19
+ * Date:2013-11-05
  *
  */
 
@@ -49,8 +49,8 @@ function table(val){
 				$bar_x,
 				$drag_x;
 
-			var s_x = o.x,
-				s_y = o.y,
+			var s_x = parseInt(o.x),
+				s_y = parseInt(o.y),
 				speed = o.animateScroll ? speed = 40 : speed = 10;
 
 			var val_x,
@@ -166,12 +166,12 @@ function table(val){
 						v3 : rate_x
 					}
 
-					if(o.x >=  sum_x){
+					if(s_x >=  sum_x){
 						$drag_x.css("left",sum_x);
 					}else{
-						$drag_x.css("left",o.x);
+						$drag_x.css("left",s_x);
 					}
-					$inner.css("left",o.x * -val_x.v3);
+					$inner.css("left",s_x * -val_x.v3);
 				}
 
 				if(isY){
@@ -185,12 +185,12 @@ function table(val){
 						v3 : rate_y
 					}
 
-					if(o.y >=  sum_y){
+					if(s_y >=  sum_y){
 						$drag_y.css("top",sum_y);
 					}else{
-						$drag_y.css("top",o.y);
+						$drag_y.css("top",s_y);
 					}
-					$inner.css("top",o.y * -val_y.v3);
+					$inner.css("top",s_y * -val_y.v3);
 				}
 
 				//callback(o.initVal/val.v1*100);
@@ -216,7 +216,6 @@ function table(val){
 					if(_.curVal <= 0){
 						_.obj1[_.attr]  = _.curVal = 0;
 						_.obj2[_.attr] = _.curVal * -_.s_val.v3;
-						log(o.animateScroll)
 						if(o.animateScroll){
 							animation(_.obj1,_.obj2);
 						}else{
