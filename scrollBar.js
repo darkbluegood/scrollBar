@@ -5,7 +5,7 @@
  * http://www.5code.net/plugin/scrollBar/scrollBar.html
  * Email:raowen520@gmail.com
  *
- * Date:2013-11-05
+ * Date:2013-11-19
  *
  */
 
@@ -51,7 +51,7 @@ function table(val){
 
 			var s_x = o.x,
 				s_y = o.y,
-				speed = o.animateScroll ? speed = 40 : speed = 5;
+				speed = o.animateScroll ? speed = 40 : speed = 10;
 
 			var val_x,
 				val_y,
@@ -215,7 +215,8 @@ function table(val){
 					
 					if(_.curVal <= 0){
 						_.obj1[_.attr]  = _.curVal = 0;
-						_.obj2[_.attr] = _.curVal = 0;
+						_.obj2[_.attr] = _.curVal * -_.s_val.v3;
+						log(o.animateScroll)
 						if(o.animateScroll){
 							animation(_.obj1,_.obj2);
 						}else{
@@ -290,7 +291,9 @@ function table(val){
 						event.preventDefault();
 						var start = mousePos(_.attr,event).t - mousePos(_.attr,event).p;
 						$(document).bind("mousemove",function(event){
-							o.animateScroll = false;
+							if(o.animateScroll){
+								$.fx.off = !$.fx.off;
+							}
 							run( _.attr , mousePos(_.attr,event).t - start  );
 						});
 					});
@@ -299,7 +302,9 @@ function table(val){
 						event.preventDefault();
 						run( _.attr , mousePos(_.attr,event).t - _.drag[ attr ]()/2 );
 						$(document).bind("mousemove",function(event){
-							o.animateScroll = false;
+							if(o.animateScroll){
+								$.fx.off = !$.fx.off;
+							}
 							run( _.attr , mousePos(_.attr,event).t - _.drag[ attr ]()/2 );
 						});
 					});
@@ -322,19 +327,18 @@ function table(val){
 				}
 
 				$(document).bind("mouseup",function(){
-					o.animateScroll = true;
 					$(document).unbind("mousemove");
 				})
 
 				if($doc.mousewheel && isY){
-					$bar_y.add($inner).bind("mousewheel",function(event,deilt){
+					$bar_y.add($this).bind("mousewheel",function(event,deilt){
 						event.preventDefault();
 						run( "y" , $drag_y.position().top -= deilt*speed );
 					});
 				}
 
 				if($doc.mousewheel && !isY && isX){
-					$bar_x.add($inner).bind("mousewheel",function(event,deilt){
+					$bar_x.add($this).bind("mousewheel",function(event,deilt){
 						event.preventDefault();
 						run( "x" , $drag_x.position().left -= deilt*speed );
 					});
