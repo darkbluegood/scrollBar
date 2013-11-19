@@ -124,6 +124,11 @@ function table(val){
 					$this.append(_bar_y);
 					$bar_y = $this.find(".scrollBar-bar-y-sl");
 					$drag_y = $this.find(".scrollBar-drag-y-sl");
+
+					if($bar_y.height() <= $drag_y.height()){
+						$bar_y.css("height",$drag_y.height()+$drag_y.height()*0.2);
+					}
+
 					isY = true;
 				}
 
@@ -146,6 +151,11 @@ function table(val){
 					$this.append(_bar_x);
 					$bar_x = $this.find(".scrollBar-bar-x-sl");
 					$drag_x = $this.find(".scrollBar-drag-x-sl");
+
+					if($bar_x.width() <= $drag_x.width()){
+						$bar_x.css("width",$drag_x.width()+$drag_x.width()*0.2);
+					}
+
 					isX = true;
 				}
 
