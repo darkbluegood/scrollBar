@@ -13,189 +13,333 @@ function log(val){
 	return console.log(val);
 }
 
+function table(val){
+	return console.table(val);
+}
+
 ;(function($){
 	$.fn.scrollBar = function(o){
 
 		var o = $.extend({},{
-			width : 300,
-			height : 20,
-			initVal : 0,
-			wheelElement : null,
-			wheel : true,
-			mode : "h",  //"h" or "v"
+			x : 0,
+			y : 0,
+			animateScroll : false,
 			callback : function(){}
 		},o);
 
-		function animate(el,dir,target){
-			var cur = parseInt(el.position()[dir]);
-			;(function(){
-				target = Math.round(target);
-				var duration = (target - cur) / 10;
-				duration = duration > 0 ? Math.ceil(duration) : Math.floor(duration);
-				cur = cur + duration;
-				el.css(dir,cur);
-				el.timer = setTimeout(arguments.callee,40);
-				if(cur == target){
-					el.timer && clearTimeout(el.timer);
-				}
-			})();
-		}
+		$.extend( $.easing,
+		{
+			easeOutExpo: function (x, t, b, c, d) {
+				return (t==d) ? b+c : c * (-Math.pow(2, -10 * t/d) + 1) + b;
+			}
+		});
 
 		function callback(parameter){
 			return o.callback(parameter);
 		}
 
-		function checkWheelEl(el){
-			if(el && typeof el == "object" && el.length >= 1){
-				return el;
-			}else{
-				return false;
-			}
-			if(typeof el == "string"){
-				return $(el);
-			}else{
-				return false;
-			}
-		}
-
 		return $(this).each(function(){
 			var $doc = $(document),
 				$this = $(this),
-				$drag;
+				$inner,
 
-			var s1 = o.initVal;
+				$bar_y,
+				$drag_y,
 
-			var mode,val;
+				$bar_x,
+				$drag_x;
+
+			var s_x = o.x,
+				s_y = o.y,
+				speed = o.animateScroll ? speed = 40 : speed = 5;
+
+			var val_x,
+				val_y,
+				isX = false,
+				isY = false;
 
 			function main(){
 				createHTML();
-				mode = mode();
-				if(!mode){
-					alert("模式错误或者默认值超出容器大小!");
-					return false;
-				}
-
 				initVal();
 				eventTrigger();
 			}
 			main();
 
 			function createHTML(){
-				$this.addClass("scrollBar-wrap-sl").css({
-					position : "relative",
-					width : o.width,
-					height : o.height
+
+				$this.css({
+					"position" : "relative",
+					"width" : $this.width()
 				});
 
-				$drag = $this.html("<div class='scrollBar-drag-sl' />")
-				.children().css({
-					position : "absolute",
-					top : 0,
-					left : 0
-				});
-			}
+				var _wrap,
+					_inner,
 
-			function mode(){
-				var m;
-				m = o.mode == "h" ? { d : "left" , s : o.width , g : $drag.width() } : o.mode == "v" ? { d : "top" , s : o.height , g : $drag.height() } : false;
-				if(o.initVal > m.s){
-					return false;
+					_bar_y,
+					_drag_y,
+					_drag_t_y,
+					_drag_m_y,
+
+					_bar_x,
+					_drag_x,
+					_drag_t_x,
+					_drag_m_x;
+
+
+				_wrap = $("<div class='scrollBar-wrap-sl' />").css({
+					"position" : "relative",
+					"overflow" : "hidden",
+					"width" : $this.width(),
+					"height" : $this.height()
+				});
+
+				_inner = $("<div class='scrollBar-inner-sl' />").css({
+					"position" : "absolute",
+					"top" : "0px",
+					"left" : "0px"
+				});
+
+				_wrap.wrapInner(_inner);
+				$this.wrapInner(_wrap);
+
+				$inner = $this.find(".scrollBar-inner-sl");
+				_wrap = $this.find(".scrollBar-wrap-sl");
+
+				if($inner.height() > $this.height()){
+					_bar_y = $("<div class='scrollBar-bar-y-sl' />");
+					_drag_y = $("<div class='scrollBar-drag-y-sl' />");
+					_drag_t_y = $("<span class='scrollBar-drag-y-top-sl' />").css({
+						"position" : "absolute",
+						"top" : "0px",
+						"left" : "0px"
+					});
+					_drag_m_y = $("<span class='scrollBar-drag-y-bottom-sl' />").css({
+						"position" : "absolute",
+						"bottom" : "0px",
+						"left" : "0px"
+					});
+
+					_drag_y.append(_drag_t_y.add(_drag_m_y));
+					_bar_y.append(_drag_y);
+					$this.append(_bar_y);
+					$bar_y = $this.find(".scrollBar-bar-y-sl");
+					$drag_y = $this.find(".scrollBar-drag-y-sl");
+					isY = true;
 				}
-				return m;
+
+				if($inner.width() > $this.width()){
+					_bar_x = $("<div class='scrollBar-bar-x-sl' />");
+					_drag_x = $("<div class='scrollBar-drag-x-sl' />");
+					_drag_t_x = $("<span class='scrollBar-drag-x-top-sl' />").css({
+						"position" : "absolute",
+						"top" : "0px",
+						"left" : "0px"
+					});
+					_drag_m_x = $("<span class='scrollBar-drag-x-bottom-sl' />").css({
+						"position" : "absolute",
+						"bottom" : "0px",
+						"left" : "0px"
+					});
+
+					_drag_x.append(_drag_t_x.add(_drag_m_x));
+					_bar_x.append(_drag_x);
+					$this.append(_bar_x);
+					$bar_x = $this.find(".scrollBar-bar-x-sl");
+					$drag_x = $this.find(".scrollBar-drag-x-sl");
+					isX = true;
+				}
+
 			}
 
 			function initVal(){
 
-				var sum1,sum2,rate,el;
+				var sum_x,sum_x_x,sum_y,sum_y_y,rate_x,rate_y;
 
-				sum1 =  mode.s - mode.g;
+				if(isX){
+					sum_x = $bar_x.width() - $drag_x.width();
+					sum_x_x = $inner.width() - $inner.parent().width();
+					rate_x = sum_x_x / sum_x;
 
-				if(el = checkWheelEl(o.wheelElement)){
-					sum2 = el.height() - el.parent().height();
-					rate = sum2 / sum1;
-					el.css("top",o.initVal * -rate);
+					val_x = {
+						v1 : sum_x,
+						v2 : sum_x_x,
+						v3 : rate_x
+					}
+
+					if(o.x >=  sum_x){
+						$drag_x.css("left",sum_x);
+					}else{
+						$drag_x.css("left",o.x);
+					}
+					$inner.css("left",o.x * -val_x.v3);
 				}
 
-				val = {
-					v1 : sum1,
-					v2 : sum2,
-					v3 : rate
-				}
-				$drag.css(mode.d,o.initVal);
+				if(isY){
+					sum_y = $bar_y.height() - $drag_y.height();
+					sum_y_y = $inner.height() - $inner.parent().height();
+					rate_y = sum_y_y / sum_y;
 
-				callback(o.initVal/val.v1*100);
+					val_y = {
+						v1 : sum_y,
+						v2 : sum_y_y,
+						v3 : rate_y
+					}
+
+					if(o.y >=  sum_y){
+						$drag_y.css("top",sum_y);
+					}else{
+						$drag_y.css("top",o.y);
+					}
+					$inner.css("top",o.y * -val_y.v3);
+				}
+
+				//callback(o.initVal/val.v1*100);
 
 			}
 
 
+			function run(attr,parameter){
 
-			function run(parameter){
-				if(checkWheelEl(o.wheelElement)){
-					o.wheelElement.timer && clearTimeout(o.wheelElement.timer);
+				function r(_){
+					var animation = function(v1,v2){
+						_.drag.stop().animate(v1,{
+							duration : 600,
+							easing : "easeOutExpo"
+						});
+
+						$inner.stop().animate(v2,{
+							duration : 600,
+							easing : "easeOutExpo"
+						});
+					}
+					
+					if(_.curVal <= 0){
+						_.obj1[_.attr]  = _.curVal = 0;
+						_.obj2[_.attr] = _.curVal = 0;
+						if(o.animateScroll){
+							animation(_.obj1,_.obj2);
+						}else{
+							_.drag.css(_.obj1);
+							$inner.css(_.obj2);
+						}
+					}else if(_.curVal >=_.s_val.v1){
+						_.obj1[_.attr] = _.curVal = _.s_val.v1;
+						_.obj2[_.attr] = _.curVal * -_.s_val.v3;
+						if(o.animateScroll){
+							animation(_.obj1,_.obj2);
+						}else{
+							_.drag.css(_.obj1);
+							$inner.css(_.obj2);
+						}
+					}else{
+						_.obj1[_.attr] = _.curVal;
+						_.obj2[_.attr] = _.curVal * -_.s_val.v3;
+						if(o.animateScroll){
+							animation(_.obj1,_.obj2);
+						}else{
+							_.drag.css(_.obj1);
+							$inner.css(_.obj2);
+						}
+					}
 				}
-				$drag.timer && clearTimeout($drag.timer);
 
-				if(parameter <= 0){
-					animate($drag,mode.d,s1 = parameter = 0);
-					if(checkWheelEl(o.wheelElement)){
-						animate(o.wheelElement,"top",0);
-					}
-				}else if(parameter >= val.v1){
-					animate($drag,mode.d,s1 = parameter = val.v1);
-					if(checkWheelEl(o.wheelElement)){
-						animate(o.wheelElement,"top",parameter * -val.v3);
-					}
-				}else{
-					animate($drag,mode.d,parameter);
-					if(checkWheelEl(o.wheelElement)){
-						animate(o.wheelElement,"top",parameter * -val.v3);
-					}
+				if(attr == "x"){
+					r({
+						drag : $drag_x,
+						curVal : parameter,
+						s_val : val_x,
+						attr : "left",
+						obj1 : {},
+						obj2 : {}
+					});
+				}
+				
+				if(attr == "y"){
+					r({
+						drag : $drag_y,
+						curVal : parameter,
+						s_val : val_y,
+						attr : "top",
+						obj1 : {},
+						obj2 : {}
+					});
 				}
 
-				callback(parameter/val.v1*100);
+				//callback(parameter/val.v1*100);
 				
 			}
 
-			function mousePos(event){
+			function mousePos(attr,event){
 				var m;
-				m = o.mode == "h" ? $.extend({},{
-					p : $drag.position().left,
+				m = (attr == "x") ? {
+					p : $drag_x.position().left,
 					t : event.pageX - $this.offset().left
-				},mode) : $.extend({},{
-					p : $drag.position().top,
+				} : {
+					p : $drag_y.position().top,
 					t : event.pageY - $this.offset().top
-				},mode);
+				};
 				return m;
 			}
 			
 			function eventTrigger(){
-				$drag.bind("mousedown",function(event){
-					event.stopPropagation();
-					event.preventDefault();
-					var start = mousePos(event).t - mousePos(event).p;
-					$(document).bind("mousemove",function(event){
-						run( s1 = mousePos(event).t - start  );
+
+				function e(_){
+					var attr = _.attr == "y" ? "height" : "width";
+					_.drag.bind("mousedown",function(event){
+						event.stopPropagation();
+						event.preventDefault();
+						var start = mousePos(_.attr,event).t - mousePos(_.attr,event).p;
+						$(document).bind("mousemove",function(event){
+							o.animateScroll = false;
+							run( _.attr , mousePos(_.attr,event).t - start  );
+						});
 					});
-				});
+
+					_.bar.bind("mousedown",function(event){
+						event.preventDefault();
+						run( _.attr , mousePos(_.attr,event).t - _.drag[ attr ]()/2 );
+						$(document).bind("mousemove",function(event){
+							o.animateScroll = false;
+							run( _.attr , mousePos(_.attr,event).t - _.drag[ attr ]()/2 );
+						});
+					});
+				}
+				
+				if(isY){
+					e({
+						drag : $drag_y,
+						bar : $bar_y,
+						attr : "y"
+					});
+				}
+
+				if(isX){
+					e({
+						drag : $drag_x,
+						bar : $bar_x,
+						attr : "x"
+					});
+				}
 
 				$(document).bind("mouseup",function(){
+					o.animateScroll = true;
 					$(document).unbind("mousemove");
 				})
 
-				$this.bind("mousedown",function(event){
-					event.preventDefault();
-					run( s1 = mousePos(event).t - mode.g/2 );
-					$(document).bind("mousemove",function(event){
-						run( s1 = mousePos(event).t - mode.g/2  );
-					});
-				})
-
-				if(o.wheel && $doc.mousewheel){
-					$this.add(o.wheelElement).bind("mousewheel",function(event,deilt){
+				if($doc.mousewheel && isY){
+					$bar_y.add($inner).bind("mousewheel",function(event,deilt){
 						event.preventDefault();
-						run(s1-=deilt*50);
+						run( "y" , $drag_y.position().top -= deilt*speed );
 					});
 				}
+
+				if($doc.mousewheel && !isY && isX){
+					$bar_x.add($inner).bind("mousewheel",function(event,deilt){
+						event.preventDefault();
+						run( "x" , $drag_x.position().left -= deilt*speed );
+					});
+				}
+
 			}
 			
 		})
