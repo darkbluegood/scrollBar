@@ -135,15 +135,15 @@ function table(val){
 				if($inner.width() > $this.width()){
 					_bar_x = $("<div class='scrollBar-bar-x-sl' />");
 					_drag_x = $("<div class='scrollBar-drag-x-sl' />");
-					_drag_t_x = $("<span class='scrollBar-drag-x-top-sl' />").css({
+					_drag_t_x = $("<span class='scrollBar-drag-x-left-sl' />").css({
 						"position" : "absolute",
 						"top" : "0px",
 						"left" : "0px"
 					});
-					_drag_m_x = $("<span class='scrollBar-drag-x-bottom-sl' />").css({
+					_drag_m_x = $("<span class='scrollBar-drag-x-right-sl' />").css({
 						"position" : "absolute",
-						"bottom" : "0px",
-						"left" : "0px"
+						"top" : "0px",
+						"right" : "0px"
 					});
 
 					_drag_x.append(_drag_t_x.add(_drag_m_x));
