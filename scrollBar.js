@@ -51,7 +51,7 @@ function table(val){
 
 			var s_x = parseInt(o.x),
 				s_y = parseInt(o.y),
-				speed = o.animateScroll ? speed = 40 : speed = 10;
+				speed = o.animateScroll ? speed = 60 : speed = 10;
 
 			var val_x,
 				val_y,
