@@ -66,98 +66,105 @@ function table(val){
 			main();
 
 			function createHTML(){
+					
+					$this.css({
+						"position" : "relative",
+						"width" : $this.width()
+					});
 
-				$this.css({
-					"position" : "relative",
-					"width" : $this.width()
-				});
+					var _wrap,
+						_inner,
 
-				var _wrap,
-					_inner,
+						_bar_y,
+						_drag_y,
+						_drag_t_y,
+						_drag_m_y,
 
-					_bar_y,
-					_drag_y,
-					_drag_t_y,
-					_drag_m_y,
-
-					_bar_x,
-					_drag_x,
-					_drag_t_x,
-					_drag_m_x;
+						_bar_x,
+						_drag_x,
+						_drag_t_x,
+						_drag_m_x;
 
 
-				_wrap = $("<div class='scrollBar-wrap-sl' />").css({
-					"position" : "relative",
-					"overflow" : "hidden",
-					"width" : $this.width(),
-					"height" : $this.height()
-				});
+					_wrap = $("<div class='scrollBar-wrap-sl' />").css({
+						"position" : "relative",
+						"overflow" : "hidden",
+						"width" : $this.width(),
+						"height" : $this.height()
+					});
 
-				_inner = $("<div class='scrollBar-inner-sl' />").css({
-					"position" : "absolute",
-					"top" : "0px",
-					"left" : "0px"
-				});
-
-				_wrap.wrapInner(_inner);
-				$this.wrapInner(_wrap);
-
-				$inner = $this.find(".scrollBar-inner-sl");
-				_wrap = $this.find(".scrollBar-wrap-sl");
-
-				if($inner.height() > $this.height()){
-					_bar_y = $("<div class='scrollBar-bar-y-sl' />");
-					_drag_y = $("<div class='scrollBar-drag-y-sl' />");
-					_drag_t_y = $("<span class='scrollBar-drag-y-top-sl' />").css({
+					_inner = $("<div class='scrollBar-inner-sl' />").css({
 						"position" : "absolute",
 						"top" : "0px",
 						"left" : "0px"
 					});
-					_drag_m_y = $("<span class='scrollBar-drag-y-bottom-sl' />").css({
-						"position" : "absolute",
-						"bottom" : "0px",
-						"left" : "0px"
-					});
 
-					_drag_y.append(_drag_t_y.add(_drag_m_y));
-					_bar_y.append(_drag_y);
-					$this.append(_bar_y);
-					$bar_y = $this.find(".scrollBar-bar-y-sl");
-					$drag_y = $this.find(".scrollBar-drag-y-sl");
+					if($this.children(".scrollBar-wrap-sl").length == 0){
+						_wrap.wrapInner(_inner);
 
-					if($bar_y.height() <= $drag_y.height()){
-						$bar_y.css("height",$drag_y.height()+$drag_y.height()*0.2);
+						$this.wrapInner(_wrap);
 					}
 
-					isY = true;
-				}
+					$inner = $this.find(".scrollBar-inner-sl");
+					_wrap = $this.find(".scrollBar-wrap-sl");
 
-				if($inner.width() > $this.width()){
-					_bar_x = $("<div class='scrollBar-bar-x-sl' />");
-					_drag_x = $("<div class='scrollBar-drag-x-sl' />");
-					_drag_t_x = $("<span class='scrollBar-drag-x-left-sl' />").css({
-						"position" : "absolute",
-						"top" : "0px",
-						"left" : "0px"
-					});
-					_drag_m_x = $("<span class='scrollBar-drag-x-right-sl' />").css({
-						"position" : "absolute",
-						"top" : "0px",
-						"right" : "0px"
-					});
+					if($inner.height() > $this.height()){
+						_bar_y = $("<div class='scrollBar-bar-y-sl' />");
+						_drag_y = $("<div class='scrollBar-drag-y-sl' />");
+						_drag_t_y = $("<span class='scrollBar-drag-y-top-sl' />").css({
+							"position" : "absolute",
+							"top" : "0px",
+							"left" : "0px"
+						});
+						_drag_m_y = $("<span class='scrollBar-drag-y-bottom-sl' />").css({
+							"position" : "absolute",
+							"bottom" : "0px",
+							"left" : "0px"
+						});
 
-					_drag_x.append(_drag_t_x.add(_drag_m_x));
-					_bar_x.append(_drag_x);
-					$this.append(_bar_x);
-					$bar_x = $this.find(".scrollBar-bar-x-sl");
-					$drag_x = $this.find(".scrollBar-drag-x-sl");
+						_drag_y.append(_drag_t_y.add(_drag_m_y));
+						_bar_y.append(_drag_y);
+						if($this.children(".scrollBar-bar-y-sl").length == 0){
+							$this.append(_bar_y);
+						}
+						$bar_y = $this.find(".scrollBar-bar-y-sl");
+						$drag_y = $this.find(".scrollBar-drag-y-sl");
 
-					if($bar_x.width() <= $drag_x.width()){
-						$bar_x.css("width",$drag_x.width()+$drag_x.width()*0.2);
+						if($bar_y.height() <= $drag_y.height()){
+							$bar_y.css("height",$drag_y.height()+$drag_y.height()*0.2);
+						}
+
+						isY = true;
 					}
 
-					isX = true;
-				}
+					if($inner.width() > $this.width()){
+						_bar_x = $("<div class='scrollBar-bar-x-sl' />");
+						_drag_x = $("<div class='scrollBar-drag-x-sl' />");
+						_drag_t_x = $("<span class='scrollBar-drag-x-left-sl' />").css({
+							"position" : "absolute",
+							"top" : "0px",
+							"left" : "0px"
+						});
+						_drag_m_x = $("<span class='scrollBar-drag-x-right-sl' />").css({
+							"position" : "absolute",
+							"top" : "0px",
+							"right" : "0px"
+						});
+
+						_drag_x.append(_drag_t_x.add(_drag_m_x));
+						_bar_x.append(_drag_x);
+						if($this.children(".scrollBar-bar-x-sl").length == 0){
+							$this.append(_bar_x);
+						}
+						$bar_x = $this.find(".scrollBar-bar-x-sl");
+						$drag_x = $this.find(".scrollBar-drag-x-sl");
+
+						if($bar_x.width() <= $drag_x.width()){
+							$bar_x.css("width",$drag_x.width()+$drag_x.width()*0.2);
+						}
+
+						isX = true;
+					}
 
 			}
 
